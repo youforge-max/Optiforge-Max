@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Foreground: 5-band mixer faders. Knob heights trace a compression curve. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Fader tracks (kept inside 72dp safe zone: x 32..76, y 32..76) -->
+    <group>
+        <path android:pathData="M30.5,33 h3 a1.5,1.5 0 0 1 1.5,1.5 v40 a1.5,1.5 0 0 1 -1.5,1.5 h-3 a1.5,1.5 0 0 1 -1.5,-1.5 v-40 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#33FFFFFF"/>
+        <path android:pathData="M41.5,33 h3 a1.5,1.5 0 0 1 1.5,1.5 v40 a1.5,1.5 0 0 1 -1.5,1.5 h-3 a1.5,1.5 0 0 1 -1.5,-1.5 v-40 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#33FFFFFF"/>
+        <path android:pathData="M52.5,33 h3 a1.5,1.5 0 0 1 1.5,1.5 v40 a1.5,1.5 0 0 1 -1.5,1.5 h-3 a1.5,1.5 0 0 1 -1.5,-1.5 v-40 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#33FFFFFF"/>
+        <path android:pathData="M63.5,33 h3 a1.5,1.5 0 0 1 1.5,1.5 v40 a1.5,1.5 0 0 1 -1.5,1.5 h-3 a1.5,1.5 0 0 1 -1.5,-1.5 v-40 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#33FFFFFF"/>
+        <path android:pathData="M74.5,33 h3 a1.5,1.5 0 0 1 1.5,1.5 v40 a1.5,1.5 0 0 1 -1.5,1.5 h-3 a1.5,1.5 0 0 1 -1.5,-1.5 v-40 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#33FFFFFF"/>
+    </group>
+
+    <!-- Active fill below each knob (accent) -->
+    <group>
+        <path android:pathData="M30.5,60 h3 a1.5,1.5 0 0 1 1.5,1.5 v13 a1.5,1.5 0 0 1 -1.5,1.5 h-3 a1.5,1.5 0 0 1 -1.5,-1.5 v-13 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FF35E0C8"/>
+        <path android:pathData="M41.5,48 h3 a1.5,1.5 0 0 1 1.5,1.5 v25 a1.5,1.5 0 0 1 -1.5,1.5 h-3 a1.5,1.5 0 0 1 -1.5,-1.5 v-25 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FF35E0C8"/>
+        <path android:pathData="M52.5,40 h3 a1.5,1.5 0 0 1 1.5,1.5 v33 a1.5,1.5 0 0 1 -1.5,1.5 h-3 a1.5,1.5 0 0 1 -1.5,-1.5 v-33 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FF35E0C8"/>
+        <path android:pathData="M63.5,50 h3 a1.5,1.5 0 0 1 1.5,1.5 v23 a1.5,1.5 0 0 1 -1.5,1.5 h-3 a1.5,1.5 0 0 1 -1.5,-1.5 v-23 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FF35E0C8"/>
+        <path android:pathData="M74.5,64 h3 a1.5,1.5 0 0 1 1.5,1.5 v9 a1.5,1.5 0 0 1 -1.5,1.5 h-3 a1.5,1.5 0 0 1 -1.5,-1.5 v-9 a1.5,1.5 0 0 1 1.5,-1.5 z" android:fillColor="#FF35E0C8"/>
+    </group>
+
+    <!-- Knobs -->
+    <group>
+        <path android:fillColor="#FFFFFFFF" android:pathData="M32,55 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0z"/>
+        <path android:fillColor="#FFFFFFFF" android:pathData="M43,43 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0z"/>
+        <path android:fillColor="#FFFFFFFF" android:pathData="M54,35 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0z"/>
+        <path android:fillColor="#FFFFFFFF" android:pathData="M65,45 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0z"/>
+        <path android:fillColor="#FFFFFFFF" android:pathData="M76,59 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0z"/>
+    </group>
+</vector>

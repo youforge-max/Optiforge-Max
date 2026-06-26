@@ -68,6 +68,7 @@ class MainActivity : ComponentActivity() {
 private fun Screen(dsp: DspEngine, meter: BandMeter, attachedInitial: Boolean, micGranted: Boolean) {
     val st = remember { UiState() }
     var attached by remember { mutableStateOf(attachedInitial) }
+    var linkAR by remember { mutableStateOf(false) }
 
     // Push initial state into the effect once attached.
     LaunchedEffect(attached) { if (attached) st.applyAll(dsp, meter) }
@@ -140,7 +141,22 @@ private fun Screen(dsp: DspEngine, meter: BandMeter, attachedInitial: Boolean, m
                     color = MaterialTheme.colorScheme.error, fontSize = 12.sp)
             }
 
-            for (b in 0 until DspEngine.NUM_BANDS) BandCard(dsp, st, b, gr[b])
+            Card {
+                Column(Modifier.padding(12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Switch(checked = linkAR, onCheckedChange = { linkAR = it })
+                        Spacer(Modifier.width(8.dp))
+                        Text("Link attack/release across bands", fontWeight = FontWeight.Bold)
+                    }
+                    Text(
+                        "When on, changing a band's Attack (or Release) applies it to all 5 bands. " +
+                            "Attack and Release stay independent; the output limiter is never affected.",
+                        fontSize = 12.sp, color = Color(0xFF999999)
+                    )
+                }
+            }
+
+            for (b in 0 until DspEngine.NUM_BANDS) BandCard(dsp, st, b, gr[b], linkAR)
 
             LimiterCard(dsp, st)
             Spacer(Modifier.height(24.dp))
@@ -219,7 +235,7 @@ private fun Spectrum(bars: List<Float>) {
 }
 
 @Composable
-private fun BandCard(dsp: DspEngine, st: UiState, band: Int, grDb: Float) {
+private fun BandCard(dsp: DspEngine, st: UiState, band: Int, grDb: Float, linkAR: Boolean) {
     Card {
         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -235,11 +251,15 @@ private fun BandCard(dsp: DspEngine, st: UiState, band: Int, grDb: Float) {
             SliderRow("Threshold", st.threshold[band], -100f, 0f, "dBFS") {
                 st.threshold[band] = it; dsp.setThreshold(band, it)
             }
+            // When linked, Attack/Release write all bands at once (limiter untouched, the two
+            // controls stay independent of each other).
             SliderRow("Attack", st.attack[band], 0f, 500f, "ms") {
-                st.attack[band] = it; dsp.setAttack(band, it)
+                if (linkAR) for (i in 0 until DspEngine.NUM_BANDS) { st.attack[i] = it; dsp.setAttack(i, it) }
+                else { st.attack[band] = it; dsp.setAttack(band, it) }
             }
             SliderRow("Release", st.release[band], 0f, 3000f, "ms") {
-                st.release[band] = it; dsp.setRelease(band, it)
+                if (linkAR) for (i in 0 until DspEngine.NUM_BANDS) { st.release[i] = it; dsp.setRelease(i, it) }
+                else { st.release[band] = it; dsp.setRelease(band, it) }
             }
             SliderRow("Ratio", st.ratio[band], 1f, 20f, ":1") {
                 st.ratio[band] = it; dsp.setRatio(band, it)
