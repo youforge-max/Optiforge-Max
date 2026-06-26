@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FiveBandComp"
+rootProject.name = "OptiforgeMax"
 include(":app")

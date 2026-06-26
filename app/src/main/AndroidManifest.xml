@@ -8,9 +8,9 @@
 
     <application
         android:allowBackup="true"
-        android:label="5-Band Comp"
+        android:label="Optiforge Max"
         android:supportsRtl="true"
-        android:theme="@style/Theme.FiveBandComp">
+        android:theme="@style/Theme.OptiforgeMax">
 
         <activity
             android:name=".MainActivity"

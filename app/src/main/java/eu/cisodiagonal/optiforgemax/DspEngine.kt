@@ -1,4 +1,4 @@
-package eu.cisodiagonal.fivebandcomp
+package eu.cisodiagonal.optiforgemax
 
 import android.media.audiofx.DynamicsProcessing
 import android.util.Log

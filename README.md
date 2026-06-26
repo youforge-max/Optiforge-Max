@@ -1,4 +1,4 @@
-# FiveBandComp
+# Optiforge-Max
 
 System-wide 5-band compressor / limiter for Android tablets.
 

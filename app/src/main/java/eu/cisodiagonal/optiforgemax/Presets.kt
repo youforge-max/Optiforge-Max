@@ -1,4 +1,4 @@
-package eu.cisodiagonal.fivebandcomp
+package eu.cisodiagonal.optiforgemax
 
 import android.content.Context
 import androidx.compose.runtime.getValue
