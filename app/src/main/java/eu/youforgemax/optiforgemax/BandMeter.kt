@@ -5,6 +5,7 @@ import android.util.Log
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.log10
+import kotlin.math.roundToInt
 
 /**
  * Per-band gain-reduction estimator.
@@ -103,25 +104,47 @@ class BandMeter(private val dsp: DspEngine) {
         computeSpectrum(fft, bins, binHz)
     }
 
-    /** Fold FFT bins into log-spaced bars normalised over [-60, 0] dB. */
+    /**
+     * Fold FFT bins into log-spaced bars normalised over [-60, 0] dB.
+     *
+     * Bar-centric, not bin-centric: FFT bins are LINEARLY spaced (~binHz apart),
+     * so at the low end a log bar can be narrower than one bin and would catch
+     * zero bins — that's why low bands looked empty. For each bar we sum the bins
+     * inside its [f0,f1) range; when none fall in, we sample the nearest bin so the
+     * bar still reflects real energy instead of dropping to silence.
+     */
     private fun computeSpectrum(fft: ByteArray, bins: Int, binHz: Float) {
+        if (binHz <= 0f) return
         val fMin = 20f
         val fMax = bins * binHz
         if (fMax <= fMin) return
         val logMin = log10(fMin)
         val logMax = log10(fMax)
-        val acc = FloatArray(SPECTRUM_BARS)
-        val cnt = IntArray(SPECTRUM_BARS)
-        for (i in 1 until bins) {
-            val freq = i * binHz
-            if (freq < fMin) continue
-            var bar = (((log10(freq) - logMin) / (logMax - logMin)) * SPECTRUM_BARS).toInt()
-            if (bar < 0) bar = 0; if (bar >= SPECTRUM_BARS) bar = SPECTRUM_BARS - 1
+        val span = logMax - logMin
+
+        fun magSq(i: Int): Float {
             val re = fft[2 * i].toFloat(); val im = fft[2 * i + 1].toFloat()
-            acc[bar] += hypot(re, im) * hypot(re, im); cnt[bar]++
+            return re * re + im * im
         }
+
         for (k in 0 until SPECTRUM_BARS) {
-            val rms = if (cnt[k] > 0) kotlin.math.sqrt(acc[k] / cnt[k]) else 0f
+            // log-spaced frequency edges for this bar
+            val f0 = Math.pow(10.0, (logMin + span * k / SPECTRUM_BARS).toDouble()).toFloat()
+            val f1 = Math.pow(10.0, (logMin + span * (k + 1) / SPECTRUM_BARS).toDouble()).toFloat()
+            var acc = 0f
+            var cnt = 0
+            var i = (f0 / binHz).toInt().coerceAtLeast(1)
+            while (i < bins && i * binHz < f1) {
+                acc += magSq(i); cnt++; i++
+            }
+            val rms = if (cnt > 0) {
+                kotlin.math.sqrt(acc / cnt)
+            } else {
+                // bar narrower than bin spacing (low end): sample nearest bin
+                val center = kotlin.math.sqrt(f0 * f1)
+                val bin = (center / binHz).roundToInt().coerceIn(1, bins - 1)
+                kotlin.math.sqrt(magSq(bin))
+            }
             val db = if (rms > 0f) 20f * log10(rms / 128f) + calibrationDb else -120f
             val norm = ((db + 60f) / 60f).coerceIn(0f, 1f)
             // smooth bars too
