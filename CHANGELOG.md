@@ -5,6 +5,17 @@ All notable changes to Optiforge-Max. Format loosely follows
 `vMAJOR.MINOR` with matching signed APKs on
 [GitHub Releases](https://github.com/youforge-max/Optiforge-Max/releases).
 
+## [1.5] — 2026-06-27
+### Added
+- **Per-player session binding** — the app now listens for the standard
+  `OPEN/CLOSE_AUDIO_EFFECT_CONTROL_SESSION` broadcasts and binds the compressor
+  to a player's own audio session. Fixes apps (notably **VLC**) whose audio
+  bypasses the global session-0 effect. A **Routing** card shows the current
+  binding with a "Use global mix" reset.
+### Notes
+- VLC must announce its session: enable **Audio → Audio effects** in VLC (or set
+  its output to AudioTrack). Binding is then automatic.
+
 ## [1.4] — 2026-06-27
 ### Added
 - **User manual** ([MANUAL.md](MANUAL.md)) — step-by-step guide for both modes,
@@ -45,6 +56,7 @@ All notable changes to Optiforge-Max. Format loosely follows
   release/ratio/makeup, output limiter, estimated gain-reduction meters,
   32-bar spectrum, meter calibration, named presets.
 
+[1.5]: https://github.com/youforge-max/Optiforge-Max/releases/tag/v1.5
 [1.4]: https://github.com/youforge-max/Optiforge-Max/releases/tag/v1.4
 [1.3]: https://github.com/youforge-max/Optiforge-Max/releases/tag/v1.3
 [1.2]: https://github.com/youforge-max/Optiforge-Max/releases/tag/v1.2

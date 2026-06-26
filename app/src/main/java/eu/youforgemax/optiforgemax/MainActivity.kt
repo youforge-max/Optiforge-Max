@@ -1,7 +1,12 @@
 package eu.youforgemax.optiforgemax
 
 import android.Manifest
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.media.audiofx.AudioEffect
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -80,12 +85,61 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun Screen(dsp: DspEngine, meter: BandMeter, attachedInitial: Boolean, micGranted: Boolean) {
+    val ctx = LocalContext.current
     val st = remember { UiState() }
     var attached by remember { mutableStateOf(attachedInitial) }
     var linkAR by remember { mutableStateOf(false) }
 
+    // Which audio session the effect is currently on, and the app that owns it
+    // (null = the global output mix, session 0).
+    var boundSession by remember { mutableIntStateOf(dsp.session) }
+    var boundPkg by remember { mutableStateOf<String?>(null) }
+
     // Push initial state into the effect once attached.
     LaunchedEffect(attached) { if (attached) st.applyAll(dsp, meter) }
+
+    // Re-home the effect on [sid] (a player session, or GLOBAL_SESSION for the
+    // output mix), re-push all params, and rebind the meter's Visualizer.
+    fun bindTo(sid: Int) {
+        val ok = dsp.attach(sid)
+        attached = ok
+        boundSession = sid
+        if (ok) {
+            st.applyAll(dsp, meter)
+            if (micGranted) meter.start()   // start() stops+rebinds to dsp.session
+        }
+    }
+
+    // System "audio effect control session" hook: players that expose an
+    // equalizer/audio-effects integration (e.g. VLC with Audio effects enabled)
+    // broadcast their session id on play. Many players — VLC especially — route
+    // audio in a way that BYPASSES the global session-0 effect, so binding to
+    // their own session is the only way to process them. We follow the most
+    // recent OPEN and revert to the global mix on its CLOSE.
+    DisposableEffect(Unit) {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(c: Context?, intent: Intent?) {
+                intent ?: return
+                val sid = intent.getIntExtra(AudioEffect.EXTRA_AUDIO_SESSION, AudioEffect.ERROR_BAD_VALUE)
+                when (intent.action) {
+                    AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION -> if (sid > 0) {
+                        boundPkg = intent.getStringExtra(AudioEffect.EXTRA_PACKAGE_NAME)
+                        bindTo(sid)
+                    }
+                    AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION -> if (sid == boundSession) {
+                        boundPkg = null
+                        bindTo(DspEngine.GLOBAL_SESSION)
+                    }
+                }
+            }
+        }
+        val filter = IntentFilter().apply {
+            addAction(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION)
+            addAction(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION)
+        }
+        ContextCompat.registerReceiver(ctx, receiver, filter, ContextCompat.RECEIVER_EXPORTED)
+        onDispose { runCatching { ctx.unregisterReceiver(receiver) } }
+    }
 
     // Poll smoothed GR + spectrum ~20 fps.
     val gr = remember { mutableStateListOf(*Array(DspEngine.NUM_BANDS) { 0f }) }
@@ -107,11 +161,38 @@ private fun Screen(dsp: DspEngine, meter: BandMeter, attachedInitial: Boolean, m
 
             if (!attached) {
                 Text(
-                    "Global audio session unavailable. Retry, or bind to a player session.",
+                    "Audio session unavailable. Retry, or start playback in a player that exposes audio effects.",
                     color = MaterialTheme.colorScheme.error
                 )
-                Button(onClick = { attached = dsp.attach(DspEngine.GLOBAL_SESSION) }) {
+                Button(onClick = { bindTo(DspEngine.GLOBAL_SESSION) }) {
                     Text("Retry attach")
+                }
+            }
+
+            // Routing status. The global mix doesn't reach every player (VLC and
+            // other apps bypass it); when a player announces its session we bind there.
+            Card {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Routing", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                        if (boundSession != DspEngine.GLOBAL_SESSION) {
+                            OutlinedButton(onClick = { boundPkg = null; bindTo(DspEngine.GLOBAL_SESSION) }) {
+                                Text("Use global mix")
+                            }
+                        }
+                    }
+                    Text(
+                        if (boundSession == DspEngine.GLOBAL_SESSION)
+                            "Global output mix (session 0). Some players (e.g. VLC) bypass this."
+                        else
+                            "Bound to ${boundPkg ?: "player"} · session $boundSession",
+                        fontSize = 12.sp, color = Color(0xFF999999)
+                    )
+                    Text(
+                        "To process VLC: in VLC enable Audio → Audio effects (so it announces its " +
+                            "session), or set its output to AudioTrack. This app then binds automatically.",
+                        fontSize = 11.sp, color = Color(0xFF777777)
+                    )
                 }
             }
 

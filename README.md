@@ -99,15 +99,20 @@ gradle :app:assembleRelease \
   -PRELEASE_KEY_PASSWORD=***
 ```
 
-## Caveat — global session
-Stock Android honors output-mix effects, but some OEM ROMs (Samsung/Xiaomi
-audio paths, offloaded/MQA/Dolby outputs) ignore session-0 effects or bypass
-them for compressed/offloaded playback. If `attach()` returns false or you hear
-no change:
-- Use the **Retry attach** button.
-- Fallback: bind to a specific player's audio session id (`DspEngine.attach(id)`)
-  — get the id from the player (e.g. `MediaPlayer.getAudioSessionId()`), or via
-  the standard `ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION` broadcast that media
-  apps send.
-- Offloaded audio: disable "MQA/Dolby/audio offload" in the player, or in
-  Developer Options, so the effect chain stays in the software mixer.
+## Caveat — global session & per-player binding
+Stock Android honors output-mix effects, but many players bypass the global
+session-0 effect: VLC (its own audio session + non-mixer output), and some OEM
+paths (Samsung/Xiaomi, offloaded/MQA/Dolby) for compressed/offloaded playback.
+
+Since **1.5** the app registers a receiver for the standard
+`OPEN/CLOSE_AUDIO_EFFECT_CONTROL_SESSION` broadcasts and **automatically binds**
+the compressor to a player's announced session id (`DspEngine.attach(id)` +
+re-applies state + rebinds the meter). The **Routing** card shows the current
+binding; "Use global mix" reverts to session 0.
+
+For a player to be bound it must announce its session:
+- **VLC**: enable **Audio → Audio effects** (and/or set output to AudioTrack).
+- Offloaded audio: disable "MQA/Dolby/audio offload" in the player or Developer
+  Options so the chain stays in the software mixer.
+- If nothing announces a session, the effect stays on the global mix; use
+  **Retry attach** if attach failed.

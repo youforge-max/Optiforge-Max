@@ -89,9 +89,24 @@ track activity for visual feedback — they are not a calibrated measurement.
 **Meter calibration** until the GR bars sit near 0. The offset is saved with the
 preset.
 
-### If you hear no effect
-Some OEM ROMs (certain Samsung/Xiaomi paths, or MQA/Dolby/"audio offload"
-outputs) bypass global output-mix effects.
+### Routing — and why some players (VLC) need a step
+Live processing sits on the **global output mix**. Many players bypass that mix
+and won't be affected by default — **VLC** is the common case (it uses its own
+audio session and output path).
+
+The app handles this automatically: when a player announces its audio session
+(the standard "audio effects" integration), Optiforge **binds to that player's
+session**. The **Routing** card shows where the effect is currently applied:
+- *Global output mix (session 0)* — affects players that use the normal mixer.
+- *Bound to <app> · session N* — affects that specific player (e.g. VLC).
+
+Tap **Use global mix** to go back to session 0.
+
+**To make VLC work:** in VLC, enable **Audio → Audio effects** (some versions:
+turn on the Equalizer), or set **Audio output** to **AudioTrack**. Start
+playback — Optiforge binds to it automatically and the Routing card updates.
+
+### If you still hear no effect
 - Press **Retry attach** (shown when attach fails).
 - Disable "audio offload / MQA / Dolby" in the player or in Developer Options so
   audio stays in the software mixer.
@@ -156,7 +171,8 @@ system picker.
 
 | Symptom | Fix |
 |---------|-----|
-| Live: no audible change | Retry attach; disable audio offload/MQA/Dolby in the player |
+| Live: no change in VLC (or similar) | Enable VLC **Audio → Audio effects** (or output = AudioTrack); the **Routing** card should bind to it. Else **Retry attach** |
+| Live: no audible change generally | Disable audio offload/MQA/Dolby in the player; check **Processing** is ON |
 | Live: GR bars never move / always pegged | Re-run **Meter calibration**; check mic permission |
 | File: "No audio to preview" / "No audio track" | The chosen file has no audio stream |
 | File: render is slow | Long files take time; loudness-normalize adds an analysis pass |
