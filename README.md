@@ -11,7 +11,7 @@ No root, no NDK. Requires Android 10+ (minSdk 29). Signed release APKs are on
 
 📖 **End-user guide: [MANUAL.md](MANUAL.md)** — step-by-step for both modes,
 control reference, calibration, troubleshooting. This README is the technical
-overview.
+overview. Version history: [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
