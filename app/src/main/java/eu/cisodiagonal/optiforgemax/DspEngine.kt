@@ -1,4 +1,4 @@
-package eu.cisodiagonal.optiforgemax
+package eu.youforgemax.optiforgemax
 
 import android.media.audiofx.DynamicsProcessing
 import android.util.Log

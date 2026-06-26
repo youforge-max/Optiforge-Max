@@ -1,4 +1,4 @@
-package eu.cisodiagonal.optiforgemax
+package eu.youforgemax.optiforgemax
 
 import android.media.audiofx.Visualizer
 import android.util.Log

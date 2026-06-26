@@ -1,4 +1,4 @@
-package eu.cisodiagonal.optiforgemax
+package eu.youforgemax.optiforgemax
 
 import android.Manifest
 import android.content.pm.PackageManager

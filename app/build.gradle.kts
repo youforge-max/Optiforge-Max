@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "eu.cisodiagonal.optiforgemax"
+    namespace = "eu.youforgemax.optiforgemax"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "eu.cisodiagonal.optiforgemax"
+        applicationId = "eu.youforgemax.optiforgemax"
         minSdk = 29              // Android 10; DynamicsProcessing is API 28+
         targetSdk = 35
         versionCode = 1

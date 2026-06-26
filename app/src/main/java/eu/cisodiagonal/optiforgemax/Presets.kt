@@ -1,4 +1,4 @@
-package eu.cisodiagonal.optiforgemax
+package eu.youforgemax.optiforgemax
 
 import android.content.Context
 import androidx.compose.runtime.getValue
