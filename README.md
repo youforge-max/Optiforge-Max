@@ -1,19 +1,33 @@
 # Optiforge-Max
 
-System-wide 5-band compressor / limiter for Android tablets.
+5-band compressor / limiter for Android tablets. Two modes, switchable from the
+top tab bar:
 
-Built on `android.media.audiofx.DynamicsProcessing` (API 28+). No root, no NDK,
-no audio capture. The effect attaches to the **global output mix session
-(session 0)**, so it processes all system audio.
+- **Live** — system-wide realtime processing of all output audio.
+- **Audio File** — offline open → preview → save for an audio (or video) file.
 
-## Controls (per spec)
+No root, no NDK. Requires Android 10+ (minSdk 29). Signed release APKs are on
+[GitHub Releases](https://github.com/youforge-max/Optiforge-Max/releases).
+
+---
+
+## Live mode
+
+Built on `android.media.audiofx.DynamicsProcessing` (API 28+). No audio capture.
+The effect attaches to the **global output mix session (session 0)**, so it
+processes all system audio.
+
+### Controls (per spec)
 - **Input gain** — pre-everything, −40…+40 dB
 - **Per band (×5):** threshold (−100…0 dBFS), attack (0…500 ms),
   release (0…3000 ms), ratio (1…20:1), makeup (−12…+24 dB), enable
 - **Output limiter:** threshold/attack/release/ratio/post-gain
 - Crossover cutoffs default 150 / 600 / 2500 / 7000 / 20000 Hz (editable in code)
 - **Per-band gain-reduction meters** (needs `RECORD_AUDIO`)
-- **Spectrum view** — 32 log-spaced bars from the same FFT
+- **Spectrum view** — 32 log-spaced bars from the same FFT (bar-centric folding,
+  so low bands aren't dropped when a bar is narrower than one FFT bin)
+- **Link attack/release** — when on, moving any band's Attack or Release writes
+  all 5 bands at once; Attack/Release stay independent, limiter untouched
 - **Presets** — named save/load/delete (SharedPreferences, JSON)
 - **Meter calibration** slider — tune the estimated level offset on-device
 
@@ -34,15 +48,51 @@ offset is saved in presets.
 All ranges are UI-only — widen them in `MainActivity.kt` (`SliderRow` calls).
 The underlying floats accept far wider values.
 
+---
+
+## Audio File mode
+
+Process a file offline and save the result — same 5-band sound as Live mode,
+rendered in pure Kotlin on PCM (the live `DynamicsProcessing` effect has no
+file-render API).
+
+1. **Open** — pick an **audio or video** file. For a video, the audio track is
+   extracted and processed; the video is discarded.
+2. **Preview** — loops a 60 s window (start point selectable) through the exact
+   render chain. Every slider edit is audible live.
+3. **Save** — renders the whole file to an AAC **`.m4a`** via the system codec.
+   Runs in the background with progress + cancel.
+
+Signal chain (`audiofile/` package):
+
+```
+input gain -> LR4 5-band crossover -> per-band soft-knee compressor + makeup
+           -> sum -> limiter (+ brickwall ceiling) -> [optional loudness gain]
+```
+
+- **Loudness normalize** — optional pass measures integrated loudness
+  (simplified ITU-R BS.1770 K-weighting) and applies a single gain to hit a
+  LUFS target (default −14), clamped to ±24 dB.
+- Has its own preset store (`presets_audiofile`) plus per-band **knee** and the
+  same **Link attack/release** toggle.
+- Whole encoded stream is buffered in memory before muxing — fine for typical
+  clips, heavy for multi-hour files.
+
 ## Build
-No Android SDK on the dev box. Open in **Android Studio** (Koala+), which
-generates the Gradle wrapper jar, then Run on the tablet. CLI alternative:
+SDK on the dev box at `~/android-sdk`. The Gradle wrapper jar is not committed;
+either open in **Android Studio** (Koala+) to generate it, or build with a local
+Gradle 8.9:
 
 ```bash
-# once, to create the wrapper jar:
-gradle wrapper --gradle-version 8.9
-./gradlew :app:assembleDebug
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+# debug
+gradle :app:assembleDebug
+
+# signed release (keystore props or env: RELEASE_STORE_FILE / _PASSWORD /
+# RELEASE_KEY_ALIAS / RELEASE_KEY_PASSWORD; falls back to unsigned if absent)
+gradle :app:assembleRelease \
+  -PRELEASE_STORE_FILE=/path/to/optiforgemax.jks \
+  -PRELEASE_STORE_PASSWORD=*** -PRELEASE_KEY_ALIAS=optiforgemax \
+  -PRELEASE_KEY_PASSWORD=***
 ```
 
 ## Caveat — global session
@@ -57,4 +107,3 @@ no change:
   apps send.
 - Offloaded audio: disable "MQA/Dolby/audio offload" in the player, or in
   Developer Options, so the effect chain stays in the software mixer.
-```
