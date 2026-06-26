@@ -52,7 +52,21 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme(colorScheme = darkColorScheme()) {
-                Screen(dsp, meter, attached, micGranted.value)
+                var tab by remember { mutableStateOf(0) }
+                Surface(Modifier.fillMaxSize()) {
+                    Column(Modifier.fillMaxSize()) {
+                        TabRow(selectedTabIndex = tab) {
+                            Tab(selected = tab == 0, onClick = { tab = 0 },
+                                text = { Text("Live") })
+                            Tab(selected = tab == 1, onClick = { tab = 1 },
+                                text = { Text("Audio File") })
+                        }
+                        when (tab) {
+                            0 -> Screen(dsp, meter, attached, micGranted.value)
+                            else -> eu.youforgemax.optiforgemax.audiofile.AudioFileScreen()
+                        }
+                    }
+                }
             }
         }
     }
