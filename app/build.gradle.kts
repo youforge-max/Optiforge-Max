@@ -61,6 +61,6 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     // Audio-file mode: lifecycleScope for the background render coroutine.
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
