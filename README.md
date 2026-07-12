@@ -1,5 +1,7 @@
 # Optiforge-Max
 
+> Android system-wide 5-band audio compressor/limiter (EQ + dynamics) — eu.cisodiagonal.optiforgemax.
+
 5-band compressor / limiter for Android tablets. Two modes, switchable from the
 top tab bar:
 
