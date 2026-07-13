@@ -1,5 +1,7 @@
 # Optiforge-Max
 
+> Android system-wide 5-band audio compressor/limiter (EQ + dynamics) — eu.youforgemax.optiforgemax.
+
 
 <p align="center">
   <img src="docs/screenshot-main.png" alt="Optiforge-Max — routing, presets, spectrum" width="260">
